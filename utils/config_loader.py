@@ -1,8 +1,10 @@
 import json
+import logging
 import os
 from typing import Any
 
 _CONFIG: dict = {}
+_logger = logging.getLogger("config_loader")
 
 REQUIRED_KEYS = [
     "report_password",
@@ -19,14 +21,24 @@ _DEFAULT_CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
 
 def load(path: str = _DEFAULT_CONFIG_PATH) -> None:
     global _CONFIG
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+    _logger.info(f"Loading config from: {path}")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        _logger.error(f"Config file not found: {path}")
+        raise
+    except json.JSONDecodeError as e:
+        _logger.error(f"Config file JSON parse error: {e}")
+        raise
 
     missing = [k for k in REQUIRED_KEYS if k not in data]
     if missing:
+        _logger.error(f"config.json is missing required keys: {missing}")
         raise ValueError(f"config.json is missing required keys: {missing}")
 
     _CONFIG = data
+    _logger.info(f"Config loaded successfully ({len(_CONFIG)} keys)")
 
 
 def get(key: str, default: Any = None) -> Any:

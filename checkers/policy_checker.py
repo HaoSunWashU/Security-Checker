@@ -27,6 +27,8 @@ class PolicyChecker(BaseChecker):
         for check in checks:
             try:
                 label, compliant, detail, recommendation = check(system)
+                status = "PASS" if compliant else "FAIL"
+                self.logger.info(f"  [{status}] {label}: {detail}")
             except Exception as e:
                 self.logger.error(f"Policy check error in {check.__name__}: {e}")
                 label = check.__name__

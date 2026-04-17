@@ -1,33 +1,47 @@
+import logging
 import os
 from datetime import datetime
 from typing import List
 from checkers.base_checker import CheckResult
 from utils import crypto, config_loader
 
+_logger = logging.getLogger("report_generator")
+
 
 def generate(results: List[CheckResult], fmt: str, path: str, system_info: dict) -> None:
     fmt = fmt.lower()
-    if fmt == "html":
-        content = _generate_html(results, system_info)
-        _write_text(path, content)
-    elif fmt == "txt":
-        content = _generate_txt(results, system_info)
-        _write_text(path, content)
-    elif fmt == "excel":
-        _generate_excel(results, system_info, path)
-        content = _generate_txt(results, system_info)
-    elif fmt == "pdf":
-        content = _generate_html(results, system_info)
-        _generate_pdf(content, path)
-        content = _generate_txt(results, system_info)
-    else:
-        raise ValueError(f"Unsupported format: {fmt}")
+    _logger.info(f"Generating {fmt.upper()} report → {path}")
+    try:
+        if fmt == "html":
+            content = _generate_html(results, system_info)
+            _write_text(path, content)
+        elif fmt == "txt":
+            content = _generate_txt(results, system_info)
+            _write_text(path, content)
+        elif fmt == "excel":
+            _generate_excel(results, system_info, path)
+            content = _generate_txt(results, system_info)
+        elif fmt == "pdf":
+            content = _generate_html(results, system_info)
+            _generate_pdf(content, path)
+            content = _generate_txt(results, system_info)
+        else:
+            raise ValueError(f"Unsupported format: {fmt}")
+        _logger.info(f"Report written: {path}")
+    except Exception as e:
+        _logger.error(f"Report generation failed ({fmt}): {e}")
+        raise
 
     enc_path = os.path.splitext(path)[0] + "_encrypted.sec"
     password = config_loader.get("report_password", "Sec@2026")
     plain = content if fmt in ("html", "txt") else _generate_txt(results, system_info)
-    encrypted = crypto.encrypt(plain, password)
-    _write_text(enc_path, encrypted)
+    try:
+        encrypted = crypto.encrypt(plain, password)
+        _write_text(enc_path, encrypted)
+        _logger.info(f"Encrypted backup written: {enc_path}")
+    except Exception as e:
+        _logger.error(f"Encryption failed: {e}")
+        raise
 
 
 def _write_text(path: str, content: str) -> None:

@@ -1,6 +1,7 @@
 import json
 import os
 from PyQt5.QtCore import QRunnable, QThreadPool, pyqtSignal, QObject
+from utils.logger import get_logger
 from PyQt5.QtWidgets import (
     QMainWindow, QTabWidget, QProgressBar,
     QToolBar, QAction, QLabel, QMessageBox, QWidget, QVBoxLayout
@@ -35,6 +36,8 @@ class _CheckerRunner(QRunnable):
 class MainWindow(QMainWindow):
     def __init__(self, system_info: dict):
         super().__init__()
+        self.logger = get_logger("MainWindow")
+        self.logger.info(f"GUI started — host: {system_info.get('hostname')}, OS: {system_info.get('os')}")
         self.system_info = system_info
         self.results = {}
         self._completed = 0
@@ -99,6 +102,7 @@ class MainWindow(QMainWindow):
         from checkers.policy_checker import PolicyChecker
         from checkers.sensitive_checker import SensitiveChecker
 
+        self.logger.info("User started scan")
         self.results = {}
         self._completed = 0
         self.progress_bar.setValue(0)
@@ -123,6 +127,8 @@ class MainWindow(QMainWindow):
             pool.start(runner)
 
     def _on_result(self, module: str, result):
+        status = "PASS" if result.passed else "FAIL"
+        self.logger.info(f"[{status}] {module} — {result.violation_count()} violation(s)")
         self.results[module] = result
         self._completed += 1
         self.progress_bar.setValue(self._completed * 25)
@@ -143,12 +149,14 @@ class MainWindow(QMainWindow):
             self.start_action.setEnabled(True)
             self.status_label.setText("  检查完成")
             violations_total = sum(r.violation_count() for r in self.results.values())
+            self.logger.info(f"Scan complete — total violations: {violations_total}")
             QMessageBox.information(
                 self, "检查完成",
                 f"全部检查完成！\n共发现 {violations_total} 项风险/违规。\n可点击"导出报告"生成合规报告。"
             )
 
     def _on_error(self, checker_name: str, error_msg: str):
+        self.logger.error(f"{checker_name} failed: {error_msg}")
         self._completed += 1
         self.progress_bar.setValue(self._completed * 25)
         QMessageBox.warning(self, "检查出错", f"{checker_name} 运行时出错:\n{error_msg}")
@@ -166,11 +174,14 @@ class MainWindow(QMainWindow):
             if not path:
                 QMessageBox.warning(self, "提示", "请选择保存路径。")
                 return
+            self.logger.info(f"User exporting report: fmt={fmt}, path={path}")
             try:
                 from utils import report_generator
                 report_generator.generate(list(self.results.values()), fmt, path, self.system_info)
+                self.logger.info("Report export successful")
                 QMessageBox.information(self, "导出成功", f"报告已保存至:\n{path}\n同时已生成加密备份 .sec 文件。")
             except Exception as e:
+                self.logger.error(f"Report export failed: {e}")
                 QMessageBox.critical(self, "导出失败", str(e))
 
     def _view_report(self):
@@ -178,6 +189,7 @@ class MainWindow(QMainWindow):
         dialog.exec_()
 
     def _clear(self):
+        self.logger.info("User cleared results")
         self.results = {}
         self._completed = 0
         self.progress_bar.setValue(0)
