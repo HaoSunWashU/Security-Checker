@@ -30,7 +30,7 @@ class PolicyChecker(BaseChecker):
                 status = "PASS" if compliant else "FAIL"
                 self.logger.info(f"  [{status}] {label}: {detail}")
             except Exception as e:
-                self.logger.error(f"Policy check error in {check.__name__}: {e}")
+                self.logger.error(f"Policy check error in {check.__name__}", exc_info=True)
                 label = check.__name__
                 compliant = False
                 detail = f"检查失败: {e}"
@@ -69,7 +69,7 @@ class PolicyChecker(BaseChecker):
             )
             return result.stdout
         except Exception as e:
-            self.logger.warning(f"netstat failed: {e}")
+            self.logger.warning("netstat failed", exc_info=True)
             return ""
 
     def _run(self, cmd: list, timeout: int = 10) -> str:
@@ -77,7 +77,7 @@ class PolicyChecker(BaseChecker):
             r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, errors="replace")
             return r.stdout + r.stderr
         except Exception as e:
-            self.logger.warning(f"Command {cmd} failed: {e}")
+            self.logger.warning(f"Command {cmd} failed", exc_info=True)
             return ""
 
     def _check_firewall(self, system: str):

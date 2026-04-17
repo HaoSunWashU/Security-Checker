@@ -20,7 +20,7 @@ class SoftwareChecker(BaseChecker):
                 installed = []
                 self.logger.warning(f"Unsupported platform: {system}")
         except Exception as e:
-            self.logger.error(f"SoftwareChecker error: {e}")
+            self.logger.error("SoftwareChecker failed to retrieve installed software", exc_info=True)
             installed = []
 
         blacklist = [s.lower() for s in self.config.get("blacklist_software", [])]
@@ -48,7 +48,9 @@ class SoftwareChecker(BaseChecker):
         if violations:
             recommendations.append("请卸载上述违规软件，禁止在内网终端使用未授权的远控、代理、网盘及破解工具。")
 
-        self.logger.info(f"SoftwareChecker done: {len(violations)} violations")
+        self.logger.info(f"SoftwareChecker done: {len(installed)} installed, {len(violations)} violations")
+        for v in violations:
+            self.logger.info(f"  [VIOLATION] {v.get('name')} v{v.get('version')} @ {v.get('path')}")
         return CheckResult(
             module="软件清单检查",
             passed=passed,
@@ -122,7 +124,7 @@ class SoftwareChecker(BaseChecker):
                         "publisher": "N/A",
                     })
         except Exception as e:
-            self.logger.warning(f"macOS app scan error: {e}")
+            self.logger.warning("macOS /Applications scan failed", exc_info=True)
 
         try:
             result = subprocess.run(

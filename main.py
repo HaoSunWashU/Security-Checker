@@ -49,8 +49,25 @@ def run_gui():
     sys.exit(app.exec_())
 
 
+def _log_startup_banner(logger):
+    import platform as _platform
+    logger.info("=" * 60)
+    logger.info("Security Checker starting")
+    logger.info(f"  Python   : {sys.version}")
+    logger.info(f"  Platform : {_platform.system()} {_platform.release()} ({_platform.machine()})")
+    logger.info(f"  Log file : check_error.log")
+    logger.info("=" * 60)
+
+
 def main():
-    config_loader.load()
+    logger = get_logger()
+    _log_startup_banner(logger)
+
+    try:
+        config_loader.load()
+    except Exception as e:
+        logger.error("Failed to load config — aborting", exc_info=True)
+        sys.exit(1)
 
     parser = argparse.ArgumentParser(description="终端安全合规检查工具 / Security Compliance Checker")
     parser.add_argument("--headless", action="store_true", help="Run without GUI")

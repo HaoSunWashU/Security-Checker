@@ -17,7 +17,7 @@ class AccountChecker(BaseChecker):
             else:
                 accounts = []
         except Exception as e:
-            self.logger.error(f"AccountChecker error: {e}")
+            self.logger.error("AccountChecker failed to retrieve accounts", exc_info=True)
             accounts = []
 
         weak_passwords = [p.lower() for p in self.config.get("weak_passwords", [])]
@@ -62,7 +62,9 @@ class AccountChecker(BaseChecker):
         if any("匿名/来宾账号" in v["issues"] for v in violations):
             recommendations.append("禁用或删除来宾/匿名账号。")
 
-        self.logger.info(f"AccountChecker done: {len(violations)} violations")
+        self.logger.info(f"AccountChecker done: {len(accounts)} accounts checked, {len(violations)} at risk")
+        for v in violations:
+            self.logger.info(f"  [RISK] {v['name']} ({v['type']}): {', '.join(v['issues'])}")
         return CheckResult(
             module="账号密码检查",
             passed=passed,
@@ -100,7 +102,7 @@ class AccountChecker(BaseChecker):
                     "disabled": disabled,
                 })
         except Exception as e:
-            self.logger.error(f"Windows account check error: {e}")
+            self.logger.error("Windows account enumeration failed", exc_info=True)
         return accounts
 
     def _get_unix_accounts(self) -> list:
@@ -124,7 +126,7 @@ class AccountChecker(BaseChecker):
                         "disabled": False,
                     })
         except Exception as e:
-            self.logger.warning(f"Could not read /etc/passwd: {e}")
+            self.logger.warning("Could not read /etc/passwd", exc_info=True)
 
         try:
             with open("/etc/shadow", "r") as f:
@@ -138,6 +140,6 @@ class AccountChecker(BaseChecker):
         except PermissionError:
             self.logger.warning("Cannot read /etc/shadow (not root) — skipping shadow check")
         except Exception as e:
-            self.logger.warning(f"Shadow read error: {e}")
+            self.logger.warning("Shadow file read error", exc_info=True)
 
         return accounts

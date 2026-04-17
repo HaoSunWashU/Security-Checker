@@ -22,10 +22,13 @@ class SensitiveChecker(BaseChecker):
         extensions = set(self.config.get("scan_extensions", []))
         max_mb = self.config.get("max_file_size_mb", 50)
         max_bytes = max_mb * 1024 * 1024
+        self.logger.info(f"  Scan dirs  : {dirs}")
+        self.logger.info(f"  Extensions : {sorted(extensions)}, max size: {max_mb}MB")
 
         files = []
         for d in dirs:
             files.extend(self._collect_files(d, extensions, max_bytes))
+        self.logger.info(f"  Files to scan: {len(files)}")
 
         violations = []
         with ThreadPoolExecutor(max_workers=4) as pool:
@@ -52,7 +55,9 @@ class SensitiveChecker(BaseChecker):
         if violations:
             recommendations.append("请及时清理或加密上述包含敏感信息的文件，避免明文存储身份证号、手机号、密级关键词等信息。")
 
-        self.logger.info(f"SensitiveChecker done: {len(violations)} sensitive files found")
+        self.logger.info(f"SensitiveChecker done: {len(files)} scanned, {len(violations)} sensitive files found")
+        for v in violations:
+            self.logger.info(f"  [SENSITIVE] {v['path']} — hits: {v['hits']}")
         return CheckResult(
             module="敏感信息检查",
             passed=passed,
@@ -95,7 +100,7 @@ class SensitiveChecker(BaseChecker):
         except PermissionError:
             pass
         except Exception as e:
-            self.logger.warning(f"Error scanning {directory}: {e}")
+            self.logger.warning(f"Error scanning directory: {directory}", exc_info=True)
         return result
 
     def _scan_file(self, path: str, keywords: list, max_bytes: int) -> dict | None:
@@ -126,7 +131,7 @@ class SensitiveChecker(BaseChecker):
                     break
 
         except Exception as e:
-            self.logger.debug(f"Could not scan {path}: {e}")
+            self.logger.debug(f"Could not scan file: {path}", exc_info=True)
             return None
 
         if hits:
