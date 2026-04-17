@@ -1,0 +1,36 @@
+{
+  "report_password": "Sec@2026",
+  "max_file_size_mb": 50,
+  "default_scan_dirs": [],
+  "blacklist_software": [
+    "TeamViewer", "AnyDesk", "UltraViewer", "Radmin", "DameWare",
+    "向日葵", "ToDesk", "远程桌面助手",
+    "Shadowsocks", "V2Ray", "Clash", "Proxifier", "Lantern",
+    "百度网盘", "阿里云盘", "腾讯微云", "Dropbox", "OneDrive",
+    "WinRAR Crack", "Office Crack", "KMSpico", "破解版",
+    "Wireshark", "Nmap", "Metasploit", "Kali", "Burp Suite",
+    "mimikatz", "LaZagne", "NetCat", "Cain", "John the Ripper",
+    "Tor Browser", "Freegate", "UltraSurf"
+  ],
+  "weak_passwords": [
+    "123456", "password", "12345678", "qwerty", "123456789",
+    "12345", "1234", "111111", "1234567", "dragon",
+    "123123", "baseball", "iloveyou", "trustno1", "sunshine",
+    "master", "welcome", "shadow", "ashley", "football",
+    "jesus", "michael", "ninja", "mustang", "password1",
+    "admin", "admin123", "root", "toor", "pass",
+    "test", "guest", "123qwe", "abc123", "letmein",
+    "monkey", "1q2w3e", "qazwsx", "zxcvbn", "1qaz2wsx",
+    "000000", "666666", "888888", "aaaaaa", "123321",
+    "a123456", "123456a", "woaini", "123456789a", "pass123"
+  ],
+  "sensitive_keywords": [
+    "绝密", "机密", "秘密", "商密", "内部敏感",
+    "不予公开", "工作秘密", "业务敏感", "涉密", "保密",
+    "TOP SECRET", "SECRET", "CONFIDENTIAL", "RESTRICTED"
+  ],
+  "scan_extensions": [".txt", ".doc", ".docx", ".xls", ".xlsx", ".pdf", ".csv", ".md"],
+  "dangerous_ports": [21, 22, 23, 135, 137, 138, 139, 445, 3389, 4444, 5900],
+  "log_max_bytes": 5242880,
+  "log_backup_count": 3
+}
