@@ -497,43 +497,68 @@ EN: Please provide: (1) a description of what happened, (2) your OS and version,
 
 ## Packaging / 打包发布
 
+### Step 1: Build the .exe on Windows / 第一步：在 Windows 上打包
+
+> This must be done on a Windows machine. PyInstaller only builds for the OS it runs on.
+> 必须在 Windows 机器上执行。PyInstaller 只能为当前操作系统打包。
+
 **English:**
-To build a standalone `.exe` yourself (must be done on a Windows machine):
 
-```bash
-# Install dependencies + PyInstaller
-pip install -r requirements.txt
-pip install pyinstaller
-
-# Build single-file executable
-pyinstaller --onefile --windowed --name SecurityChecker main.py
-```
-
-Output: `dist/SecurityChecker.exe`. Copy this file to any Windows machine — no Python required.
-
-To publish it as a GitHub Release:
-1. Build the `.exe` on Windows using the command above
-2. Go to [Releases](https://github.com/HaoSunWashU/Security-Checker/releases) → edit the draft release
-3. Attach `dist/SecurityChecker.exe` and publish
+1. Make sure Python 3.10+ is installed. Open Command Prompt or PowerShell as Administrator.
+2. Clone the repo and install dependencies:
+   ```bash
+   git clone https://github.com/HaoSunWashU/Security-Checker.git
+   cd Security-Checker
+   pip install -r requirements.txt
+   pip install pyinstaller
+   ```
+3. Build the executable:
+   ```bash
+   pyinstaller --onefile --windowed --name SecurityChecker main.py
+   ```
+4. Find the output at `dist\SecurityChecker.exe`. This file runs on any Windows machine without Python.
 
 **中文：**
-自行打包独立 `.exe`（必须在 Windows 机器上执行）：
 
-```bash
-# 安装依赖及打包工具
-pip install -r requirements.txt
-pip install pyinstaller
+1. 确保已安装 Python 3.10+，以管理员身份打开命令提示符或 PowerShell。
+2. 克隆仓库并安装依赖：
+   ```bash
+   git clone https://github.com/HaoSunWashU/Security-Checker.git
+   cd Security-Checker
+   pip install -r requirements.txt
+   pip install pyinstaller
+   ```
+3. 执行打包命令：
+   ```bash
+   pyinstaller --onefile --windowed --name SecurityChecker main.py
+   ```
+4. 打包完成后，在 `dist\SecurityChecker.exe` 找到输出文件。该文件可在任意 Windows 机器上直接运行，无需安装 Python。
 
-# 打包为单文件可执行程序
-pyinstaller --onefile --windowed --name SecurityChecker main.py
-```
+---
 
-输出文件：`dist/SecurityChecker.exe`，可直接复制到任意 Windows 机器运行，无需安装 Python。
+### Step 2: Publish the GitHub Release / 第二步：发布 GitHub Release
 
-发布到 GitHub Release：
-1. 在 Windows 机器上使用上述命令打包生成 `.exe`
-2. 前往 [Releases](https://github.com/HaoSunWashU/Security-Checker/releases) → 编辑草稿发布
-3. 上传 `dist/SecurityChecker.exe` 并发布
+**English:**
+
+1. Go to [https://github.com/HaoSunWashU/Security-Checker/releases](https://github.com/HaoSunWashU/Security-Checker/releases)
+2. You will see a **Draft** release named `Security Checker v1.0.0` — click **Edit** (pencil icon).
+3. Scroll down to the **Attach binaries** section at the bottom of the edit page.
+4. Drag and drop `dist\SecurityChecker.exe` into the upload area, or click to browse and select the file.
+5. Wait for the upload to complete (you will see the filename and file size appear).
+6. Click **Publish release** (green button).
+
+The `.exe` is now publicly available. Anyone can go to the Releases page and download it directly.
+
+**中文：**
+
+1. 前往 [https://github.com/HaoSunWashU/Security-Checker/releases](https://github.com/HaoSunWashU/Security-Checker/releases)
+2. 页面中会显示一个 **Draft（草稿）** 状态的发布版本 `Security Checker v1.0.0`，点击 **Edit（编辑，铅笔图标）**。
+3. 在编辑页面底部找到 **Attach binaries（附加文件）** 区域。
+4. 将 `dist\SecurityChecker.exe` 拖拽到上传区域，或点击选择文件手动上传。
+5. 等待上传完成（页面会显示文件名和文件大小）。
+6. 点击 **Publish release（发布，绿色按钮）**。
+
+发布完成后，任何人均可通过 Releases 页面直接下载 `.exe` 文件。
 
 ---
 
