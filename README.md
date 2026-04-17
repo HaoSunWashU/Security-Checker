@@ -9,6 +9,7 @@
 
 - [Overview / 概述](#overview--概述)
 - [System Requirements / 系统要求](#system-requirements--系统要求)
+- [Download / 下载](#download--下载)
 - [Installation / 安装](#installation--安装)
 - [Quick Start / 快速开始](#quick-start--快速开始)
 - [User Guide / 使用说明](#user-guide--使用说明)
@@ -61,9 +62,36 @@ Security Checker scans your computer across four dimensions and generates a comp
 
 ---
 
+## Download / 下载
+
+**English:**
+The easiest way to get started on Windows is to download the pre-built executable from the GitHub Releases page — no Python installation required.
+
+**中文：**
+Windows用户最简单的方式是从 GitHub Releases 页面下载预编译的可执行文件，无需安装 Python。
+
+| Platform / 平台 | Download / 下载 | Notes / 说明 |
+|---|---|---|
+| Windows 7 / 10 / 11 | [SecurityChecker.exe](https://github.com/HaoSunWashU/Security-Checker/releases/latest) | Double-click to run / 双击运行 |
+| UOS Linux / macOS | Run from source / 源码运行 | See Installation below / 见下方安装说明 |
+
+> **Windows users / Windows用户:** Right-click → "Run as administrator" for full results. / 右键 → "以管理员身份运行"以获取完整检查结果。
+
+---
+
 ## Installation / 安装
 
-### Option A: Run from source / 方式A：源码运行
+### Option A: Download pre-built executable (Windows) / 方式A：下载预编译文件（Windows）
+
+1. Go to [Releases](https://github.com/HaoSunWashU/Security-Checker/releases/latest)
+2. Download `SecurityChecker.exe`
+3. Right-click → **Run as administrator**
+
+前往 [Releases](https://github.com/HaoSunWashU/Security-Checker/releases/latest) 下载 `SecurityChecker.exe`，右键以管理员身份运行即可。
+
+---
+
+### Option B: Run from source / 方式B：源码运行
 
 ```bash
 # 1. Clone the repository / 克隆仓库
@@ -77,12 +105,11 @@ pip install -r requirements.txt
 python main.py
 ```
 
-### Option B: Run packaged executable / 方式B：运行打包后的可执行文件
+### Option C: Run packaged executable (UOS Linux) / 方式C：运行打包后的可执行文件（统信UOS）
 
-- **Windows**: Double-click `SecurityChecker.exe` — no Python required / 双击运行，无需安装 Python
 - **UOS Linux**: Run `./SecurityChecker` in terminal / 在终端中执行 `./SecurityChecker`
 
-> **Windows note / Windows注意事项:** Your antivirus may flag the `.exe` on first run. This is a false positive — add it to your trusted list. / 首次运行时杀毒软件可能会误报，请将其添加到信任列表。
+> **Antivirus note / 杀软注意事项:** Your antivirus may flag the `.exe` on first run. This is a false positive common with PyInstaller — add it to your trusted list. / 首次运行时杀毒软件可能误报（PyInstaller常见问题），请将其添加到信任列表。
 
 ---
 
@@ -471,24 +498,42 @@ EN: Please provide: (1) a description of what happened, (2) your OS and version,
 ## Packaging / 打包发布
 
 **English:**
-To build a standalone executable (no Python required on target machine):
+To build a standalone `.exe` yourself (must be done on a Windows machine):
 
 ```bash
+# Install dependencies + PyInstaller
+pip install -r requirements.txt
 pip install pyinstaller
+
+# Build single-file executable
 pyinstaller --onefile --windowed --name SecurityChecker main.py
 ```
 
-Output: `dist/SecurityChecker.exe` (Windows) or `dist/SecurityChecker` (Linux/macOS).
+Output: `dist/SecurityChecker.exe`. Copy this file to any Windows machine — no Python required.
+
+To publish it as a GitHub Release:
+1. Build the `.exe` on Windows using the command above
+2. Go to [Releases](https://github.com/HaoSunWashU/Security-Checker/releases) → edit the draft release
+3. Attach `dist/SecurityChecker.exe` and publish
 
 **中文：**
-打包为无需安装Python的独立可执行文件：
+自行打包独立 `.exe`（必须在 Windows 机器上执行）：
 
 ```bash
+# 安装依赖及打包工具
+pip install -r requirements.txt
 pip install pyinstaller
+
+# 打包为单文件可执行程序
 pyinstaller --onefile --windowed --name SecurityChecker main.py
 ```
 
-输出文件：`dist/SecurityChecker.exe`（Windows）或 `dist/SecurityChecker`（Linux/macOS）。
+输出文件：`dist/SecurityChecker.exe`，可直接复制到任意 Windows 机器运行，无需安装 Python。
+
+发布到 GitHub Release：
+1. 在 Windows 机器上使用上述命令打包生成 `.exe`
+2. 前往 [Releases](https://github.com/HaoSunWashU/Security-Checker/releases) → 编辑草稿发布
+3. 上传 `dist/SecurityChecker.exe` 并发布
 
 ---
 
