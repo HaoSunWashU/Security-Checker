@@ -9,7 +9,7 @@ class SensitiveTab(QWidget):
         super().__init__()
         layout = QVBoxLayout(self)
 
-        self.label = QLabel("敏感信息检查 — 点击"开始检查"运行")
+        self.label = QLabel("敏感信息检查 — 点击「开始检查」运行")
         layout.addWidget(self.label)
 
         dir_group = QGroupBox("自定义扫描目录（默认扫描桌面和文档，可添加其他目录）")
@@ -43,7 +43,7 @@ class SensitiveTab(QWidget):
         self.browser.setHtml(self._to_html(result))
 
     def clear(self):
-        self.label.setText("敏感信息检查 — 点击"开始检查"运行")
+        self.label.setText("敏感信息检查 — 点击「开始检查」运行")
         self.browser.clear()
 
     def _add_directory(self):

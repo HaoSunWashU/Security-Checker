@@ -5,7 +5,7 @@ class SoftwareTab(QWidget):
     def __init__(self):
         super().__init__()
         layout = QVBoxLayout(self)
-        self.label = QLabel("软件清单检查 — 点击"开始检查"运行")
+        self.label = QLabel("软件清单检查 — 点击「开始检查」运行")
         self.browser = QTextBrowser()
         layout.addWidget(self.label)
         layout.addWidget(self.browser)
@@ -16,7 +16,7 @@ class SoftwareTab(QWidget):
         self.browser.setHtml(self._to_html(result))
 
     def clear(self):
-        self.label.setText("软件清单检查 — 点击"开始检查"运行")
+        self.label.setText("软件清单检查 — 点击「开始检查」运行")
         self.browser.clear()
 
     def _to_html(self, result) -> str:
