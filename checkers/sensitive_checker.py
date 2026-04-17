@@ -103,7 +103,7 @@ class SensitiveChecker(BaseChecker):
             self.logger.warning(f"Error scanning directory: {directory}", exc_info=True)
         return result
 
-    def _scan_file(self, path: str, keywords: list, max_bytes: int) -> dict | None:
+    def _scan_file(self, path: str, keywords: list, max_bytes: int):
         hits = []
         _, ext = os.path.splitext(path)
         ext = ext.lower()
