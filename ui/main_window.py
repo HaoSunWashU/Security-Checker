@@ -152,7 +152,7 @@ class MainWindow(QMainWindow):
             self.logger.info(f"Scan complete — total violations: {violations_total}")
             QMessageBox.information(
                 self, "检查完成",
-                f"全部检查完成！\n共发现 {violations_total} 项风险/违规。\n可点击"导出报告"生成合规报告。"
+                f"全部检查完成！\n共发现 {violations_total} 项风险/违规。\n可点击「导出报告」生成合规报告。"
             )
 
     def _on_error(self, checker_name: str, error_msg: str):
