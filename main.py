@@ -37,11 +37,21 @@ def run_headless(export_fmt: str, output_path: str) -> int:
 
 
 def run_gui():
-    from PyQt5.QtWidgets import QApplication
+    import traceback
+    from PyQt5.QtWidgets import QApplication, QMessageBox
     from ui.main_window import MainWindow
 
     app = QApplication(sys.argv)
     app.setApplicationName("终端安全合规检查工具")
+
+    logger = get_logger()
+
+    def _excepthook(exc_type, exc_value, exc_tb):
+        msg = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+        logger.error(f"Unhandled exception:\n{msg}")
+        QMessageBox.critical(None, "未处理的错误", f"程序遇到未处理的错误：\n\n{exc_value}\n\n详情已写入 check_error.log")
+
+    sys.excepthook = _excepthook
 
     system_info = get_system_info()
     window = MainWindow(system_info)
