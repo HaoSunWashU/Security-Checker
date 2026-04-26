@@ -28,6 +28,7 @@
 - [Privacy & Security / 隐私与安全](#privacy--security--隐私与安全)
 - [Troubleshooting / 常见问题](#troubleshooting--常见问题)
 - [Packaging / 打包发布](#packaging--打包发布)
+- [Update Log / 更新日志](#update-log--更新日志)
 
 ---
 
@@ -379,7 +380,7 @@ Scans files in Desktop, Documents, and any custom directories you add. Detects:
 
 Supported file types: `.txt`, `.doc`, `.docx`, `.xls`, `.xlsx`, `.pdf`, `.csv`, `.md`
 
-Files larger than 50 MB are skipped. Only the first/last 10 KB of text files and first 3 pages of PDFs/Word docs are scanned for performance.
+Files larger than 50 MB are skipped. Only the first/last 10 KB of text files and first 10 pages of PDFs are scanned for performance.
 
 **中文：**
 扫描桌面、文档及您添加的自定义目录中的文件，检测以下内容：
@@ -390,7 +391,7 @@ Files larger than 50 MB are skipped. Only the first/last 10 KB of text files and
 
 支持文件格式：`.txt`、`.doc`、`.docx`、`.xls`、`.xlsx`、`.pdf`、`.csv`、`.md`
 
-超过50MB的文件将被跳过。文本文件仅读取头尾各10KB，PDF/Word文档仅读取前3页，以确保扫描性能。
+超过50MB的文件将被跳过。文本文件仅读取头尾各10KB，PDF文件仅读取前10页，以确保扫描性能。
 
 ---
 
@@ -571,6 +572,40 @@ The `.exe` is now publicly available. Anyone can go to the Releases page and dow
 6. 点击 **Publish release（发布，绿色按钮）**。
 
 发布完成后，任何人均可通过 Releases 页面直接下载 `.exe` 文件。
+
+---
+
+## Update Log / 更新日志
+
+---
+
+### v1.1.0 — 2026-04-26
+
+**English:**
+
+- **Login dialog before scan**: A new dialog now appears before every scan, collecting operator identity (单位 / 部门 / 姓名). Previously filled values are pre-populated for convenience.
+- **Report filename includes operator identity**: Exported reports are now automatically named `{单位}_{部门}_{姓名}_{日期}` (e.g., `某单位_安全部_张三_20260426.html`) for non-repudiation and traceability.
+- **Report headers include operator identity**: All report formats (HTML, TXT, Excel) now include 被检查人单位、部门、姓名 at the top.
+- **Software tab shows all installed software**: Previously only violations were displayed. Now all installed software is listed; violating items are highlighted in red with a 🚫 flag.
+- **Account tab shows all accounts**: Previously only risky accounts were displayed. Now all local accounts are listed in a table; risky accounts are highlighted in red with a ⚠ flag. Columns: account name, type, empty password, password never expires, disabled, risk items.
+- **Sensitive checker — keyword loop fix**: Only the first matching keyword was previously reported due to a `break` statement. Now all matching keywords in a file are reported.
+- **Sensitive checker — `.doc` reading improved**: Old binary Word 97–2003 (`.doc`) files are now read via a three-stage fallback: win32com (Windows with Word installed) → antiword → binary extraction. Previously these files were not handled separately from `.docx`.
+- **Sensitive checker — PDF scan expanded**: Scan depth increased from 3 pages to 10 pages per PDF.
+- **Sensitive checker — Excel scan expanded**: Now reads all sheets (previously only the first sheet) with up to 500 rows each (previously 100 rows). Correctly uses `xlrd` engine for legacy `.xls` files.
+- **Dependency fix**: Added `xlrd>=2.0.1` to `requirements.txt`. Without it, `.xls` files were silently skipped.
+
+**中文：**
+
+- **扫描前身份信息录入**：每次检查前新增弹窗，要求录入被检查人单位、部门、姓名，上次输入内容自动预填。
+- **报告文件名包含身份信息**：导出报告文件名自动命名为 `{单位}_{部门}_{姓名}_{日期}`（如 `某单位_安全部_张三_20260426.html`），便于存档追溯、确保不可抵赖性。
+- **报告正文包含身份信息**：所有格式（HTML、TXT、Excel）的报告顶部均新增被检查人单位、部门、姓名字段。
+- **软件清单标签页显示全量软件**：原仅显示违规软件，现改为显示所有已安装软件，违规项以红色高亮并标注 🚫。
+- **账号密码标签页显示全量账号**：原仅显示风险账号，现改为以表格形式显示所有本地账号，风险账号红色高亮并标注 ⚠。列信息：账号名、类型、空密码、密码永不过期、已禁用、风险项。
+- **敏感检查 — 修复关键词循环中断问题**：原因 `break` 语句导致每个文件只上报第一个匹配的关键词，现已修复，所有匹配关键词均会上报。
+- **敏感检查 — 改进 `.doc` 文件读取**：旧版二进制 Word 97–2003（`.doc`）文件现支持三级读取回退：win32com（Windows + 已安装 Word）→ antiword → 二进制提取。原先未对 `.doc` 与 `.docx` 单独处理。
+- **敏感检查 — 扩大 PDF 扫描范围**：每份 PDF 扫描页数从 3 页扩大至 10 页。
+- **敏感检查 — 扩大 Excel 扫描范围**：现读取全部工作表（原仅读第一个），每表最多 500 行（原 100 行），`.xls` 文件正确使用 `xlrd` 引擎。
+- **依赖修复**：`requirements.txt` 新增 `xlrd>=2.0.1`。缺少此依赖时 `.xls` 文件将被静默跳过。
 
 ---
 
