@@ -13,6 +13,7 @@ from ui.tabs.policy_tab import PolicyTab
 from ui.tabs.sensitive_tab import SensitiveTab
 from ui.dialogs.export_dialog import ExportDialog
 from ui.dialogs.view_report_dialog import ViewReportDialog
+from ui.dialogs.user_info_dialog import UserInfoDialog
 
 
 class _CheckerSignals(QObject):
@@ -45,6 +46,7 @@ class MainWindow(QMainWindow):
         self.logger.info(f"GUI started — host: {system_info.get('hostname')}, OS: {system_info.get('os')}")
         self.system_info = system_info
         self.results = {}
+        self.user_info = {}          # filled by UserInfoDialog before each scan
         self._completed = 0
         self._total_checkers = 4
 
@@ -115,7 +117,15 @@ class MainWindow(QMainWindow):
             from checkers.policy_checker import PolicyChecker
             from checkers.sensitive_checker import SensitiveChecker
 
-            self.logger.info("User started scan")
+            # Always ask for operator info before scanning
+            dlg = UserInfoDialog(self, prefill=self.user_info)
+            if dlg.exec_() != dlg.Accepted:
+                return
+            self.user_info = dlg.get_user_info()
+            self.logger.info(
+                f"User started scan — operator: "
+                f"{self.user_info.get('org')} / {self.user_info.get('dept')} / {self.user_info.get('name')}"
+            )
             self.results = {}
             self._completed = 0
             self.progress_bar.setValue(0)
@@ -193,7 +203,12 @@ class MainWindow(QMainWindow):
             if not self.results:
                 QMessageBox.warning(self, "提示", "请先运行检查，再导出报告。")
                 return
-            dialog = ExportDialog(self)
+            from datetime import datetime
+            date_str = datetime.now().strftime("%Y%m%d")
+            parts = [self.user_info.get(k, "") for k in ("org", "dept", "name")]
+            suggested = "_".join(p for p in parts if p) or "security_report"
+            suggested += f"_{date_str}"
+            dialog = ExportDialog(self, suggested_name=suggested)
             if dialog.exec_():
                 fmt, path = dialog.get_selection()
                 if not path:
@@ -202,7 +217,7 @@ class MainWindow(QMainWindow):
                 self.logger.info(f"User exporting report: fmt={fmt}, path={path}")
                 try:
                     from utils import report_generator
-                    report_generator.generate(list(self.results.values()), fmt, path, self.system_info)
+                    report_generator.generate(list(self.results.values()), fmt, path, self.system_info, self.user_info)
                     self.logger.info("Report export successful")
                     QMessageBox.information(self, "导出成功", f"报告已保存至:\n{path}\n同时已生成加密备份 .sec 文件。")
                 except Exception as e:

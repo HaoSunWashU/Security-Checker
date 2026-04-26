@@ -8,23 +8,25 @@ from utils import crypto, config_loader
 _logger = logging.getLogger("report_generator")
 
 
-def generate(results: List[CheckResult], fmt: str, path: str, system_info: dict) -> None:
+def generate(results: List[CheckResult], fmt: str, path: str,
+             system_info: dict, user_info: dict = None) -> None:
     fmt = fmt.lower()
+    user_info = user_info or {}
     _logger.info(f"Generating {fmt.upper()} report → {path}")
     try:
         if fmt == "html":
-            content = _generate_html(results, system_info)
+            content = _generate_html(results, system_info, user_info)
             _write_text(path, content)
         elif fmt == "txt":
-            content = _generate_txt(results, system_info)
+            content = _generate_txt(results, system_info, user_info)
             _write_text(path, content)
         elif fmt == "excel":
-            _generate_excel(results, system_info, path)
-            content = _generate_txt(results, system_info)
+            _generate_excel(results, system_info, path, user_info)
+            content = _generate_txt(results, system_info, user_info)
         elif fmt == "pdf":
-            content = _generate_html(results, system_info)
+            content = _generate_html(results, system_info, user_info)
             _generate_pdf(content, path)
-            content = _generate_txt(results, system_info)
+            content = _generate_txt(results, system_info, user_info)
         else:
             raise ValueError(f"Unsupported format: {fmt}")
         _logger.info(f"Report written: {path}")
@@ -49,16 +51,20 @@ def _write_text(path: str, content: str) -> None:
         f.write(content)
 
 
-def _generate_txt(results: List[CheckResult], system_info: dict) -> str:
+def _generate_txt(results: List[CheckResult], system_info: dict, user_info: dict = None) -> str:
+    user_info = user_info or {}
     lines = []
     lines.append("=" * 60)
     lines.append("         终端安全合规检查报告")
     lines.append("=" * 60)
-    lines.append(f"设备名称: {system_info.get('hostname', 'N/A')}")
-    lines.append(f"操作系统: {system_info.get('os', 'N/A')}")
-    lines.append(f"MAC地址:  {system_info.get('mac', 'N/A')}")
-    lines.append(f"IP地址:   {system_info.get('ip', 'N/A')}")
-    lines.append(f"检查时间: {system_info.get('check_time', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))}")
+    lines.append(f"被检查人单位: {user_info.get('org', 'N/A')}")
+    lines.append(f"被检查人部门: {user_info.get('dept', 'N/A')}")
+    lines.append(f"被检查人姓名: {user_info.get('name', 'N/A')}")
+    lines.append(f"设备名称:     {system_info.get('hostname', 'N/A')}")
+    lines.append(f"操作系统:     {system_info.get('os', 'N/A')}")
+    lines.append(f"MAC地址:      {system_info.get('mac', 'N/A')}")
+    lines.append(f"IP地址:       {system_info.get('ip', 'N/A')}")
+    lines.append(f"检查时间:     {system_info.get('check_time', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))}")
     lines.append("=" * 60)
 
     for r in results:
@@ -76,7 +82,8 @@ def _generate_txt(results: List[CheckResult], system_info: dict) -> str:
     return "\n".join(lines)
 
 
-def _generate_html(results: List[CheckResult], system_info: dict) -> str:
+def _generate_html(results: List[CheckResult], system_info: dict, user_info: dict = None) -> str:
+    user_info = user_info or {}
     rows = ""
     for r in results:
         status_class = "compliant" if r.passed else "non-compliant"
@@ -117,6 +124,9 @@ def _generate_html(results: List[CheckResult], system_info: dict) -> str:
 <body>
 <h1>终端安全合规检查报告</h1>
 <div class="info-box">
+  <p><strong>被检查人单位：</strong>{user_info.get('org', 'N/A')}</p>
+  <p><strong>被检查人部门：</strong>{user_info.get('dept', 'N/A')}</p>
+  <p><strong>被检查人姓名：</strong>{user_info.get('name', 'N/A')}</p>
   <p><strong>设备名称：</strong>{system_info.get('hostname', 'N/A')}</p>
   <p><strong>操作系统：</strong>{system_info.get('os', 'N/A')}</p>
   <p><strong>MAC地址：</strong>{system_info.get('mac', 'N/A')}</p>
@@ -128,7 +138,8 @@ def _generate_html(results: List[CheckResult], system_info: dict) -> str:
 </html>"""
 
 
-def _generate_excel(results: List[CheckResult], system_info: dict, path: str) -> None:
+def _generate_excel(results: List[CheckResult], system_info: dict, path: str, user_info: dict = None) -> None:
+    user_info = user_info or {}
     import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment
 
@@ -137,6 +148,9 @@ def _generate_excel(results: List[CheckResult], system_info: dict, path: str) ->
 
     info_ws = wb.create_sheet("设备信息")
     info_ws.append(["字段", "值"])
+    info_ws.append(["被检查人单位", user_info.get("org", "N/A")])
+    info_ws.append(["被检查人部门", user_info.get("dept", "N/A")])
+    info_ws.append(["被检查人姓名", user_info.get("name", "N/A")])
     for k, v in system_info.items():
         info_ws.append([k, v])
 

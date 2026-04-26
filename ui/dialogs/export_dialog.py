@@ -5,12 +5,13 @@ from PyQt5.QtWidgets import (
 
 
 class ExportDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, suggested_name: str = "security_report"):
         super().__init__(parent)
         self.setWindowTitle("导出报告")
         self.setMinimumWidth(420)
         self._fmt = "html"
         self._path = ""
+        self._suggested_name = suggested_name
 
         layout = QVBoxLayout(self)
 
@@ -46,7 +47,7 @@ class ExportDialog(QDialog):
         fmt = self.fmt_combo.currentText()
         ext = ext_map.get(fmt, "txt")
         path, _ = QFileDialog.getSaveFileName(
-            self, "保存报告", f"security_report.{ext}",
+            self, "保存报告", f"{self._suggested_name}.{ext}",
             f"{fmt} Files (*.{ext});;All Files (*)"
         )
         if path:

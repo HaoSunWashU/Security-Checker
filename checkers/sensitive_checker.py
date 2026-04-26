@@ -110,8 +110,10 @@ class SensitiveChecker(BaseChecker):
         try:
             if ext in (".txt", ".csv", ".md"):
                 text = self._read_text_partial(path)
-            elif ext in (".doc", ".docx"):
+            elif ext == ".docx":
                 text = self._read_docx(path)
+            elif ext == ".doc":
+                text = self._read_doc(path)
             elif ext == ".pdf":
                 text = self._read_pdf(path)
             elif ext in (".xls", ".xlsx"):
@@ -128,7 +130,6 @@ class SensitiveChecker(BaseChecker):
             for kw in keywords:
                 if kw in text:
                     hits.append(f"密级关键词({kw})")
-                    break
 
         except Exception as e:
             self.logger.debug(f"Could not scan file: {path}", exc_info=True)
@@ -153,10 +154,60 @@ class SensitiveChecker(BaseChecker):
             return ""
 
     def _read_docx(self, path: str) -> str:
+        """Read .docx (Office Open XML) format."""
         try:
             import docx
             doc = docx.Document(path)
-            return "\n".join(p.text for p in doc.paragraphs[:30])
+            texts = [p.text for p in doc.paragraphs[:200]]
+            # Also scan table cells
+            for table in doc.tables:
+                for row in table.rows:
+                    for cell in row.cells:
+                        texts.append(cell.text)
+            return "\n".join(texts)
+        except Exception:
+            return ""
+
+    def _read_doc(self, path: str) -> str:
+        """Read old .doc (binary Word 97-2003) format."""
+        # Try win32com on Windows (requires Word installed)
+        try:
+            import win32com.client
+            import pythoncom
+            pythoncom.CoInitialize()
+            word = win32com.client.Dispatch("Word.Application")
+            word.Visible = False
+            word.DisplayAlerts = False
+            doc = word.Documents.Open(os.path.abspath(path))
+            text = doc.Content.Text
+            doc.Close(False)
+            word.Quit()
+            return text
+        except Exception:
+            pass
+
+        # Try antiword (Linux / macOS)
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["antiword", path], capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0 and result.stdout:
+                return result.stdout
+        except Exception:
+            pass
+
+        # Fallback: extract printable ASCII + attempt UTF-16-LE decode
+        try:
+            with open(path, "rb") as f:
+                data = f.read(500 * 1024)
+            ascii_parts = re.findall(rb"[\x20-\x7e]{4,}", data)
+            ascii_text = b" ".join(ascii_parts).decode("ascii", errors="ignore")
+            try:
+                utf16_text = data.decode("utf-16-le", errors="ignore")
+            except Exception:
+                utf16_text = ""
+            return ascii_text + "\n" + utf16_text
         except Exception:
             return ""
 
@@ -164,15 +215,24 @@ class SensitiveChecker(BaseChecker):
         try:
             import pdfplumber
             with pdfplumber.open(path) as pdf:
-                pages = pdf.pages[:3]
-                return "\n".join(p.extract_text() or "" for p in pages)
+                return "\n".join(p.extract_text() or "" for p in pdf.pages[:10])
         except Exception:
             return ""
 
     def _read_excel(self, path: str) -> str:
+        """Read all sheets from .xls or .xlsx, up to 500 rows each."""
         try:
             import pandas as pd
-            df = pd.read_excel(path, nrows=100)
-            return df.to_string()
+            _, ext = os.path.splitext(path)
+            engine = "xlrd" if ext.lower() == ".xls" else None
+            xl = pd.ExcelFile(path, engine=engine)
+            texts = []
+            for sheet in xl.sheet_names:
+                try:
+                    df = xl.parse(sheet, nrows=500)
+                    texts.append(df.to_string())
+                except Exception:
+                    continue
+            return "\n".join(texts)
         except Exception:
             return ""

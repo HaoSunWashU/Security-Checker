@@ -10,6 +10,7 @@ class CheckResult:
     violations: List[dict]
     summary: str
     recommendations: List[str] = field(default_factory=list)
+    extra: dict = field(default_factory=dict)   # arbitrary per-module payload
 
     def violation_count(self) -> int:
         return len(self.violations)

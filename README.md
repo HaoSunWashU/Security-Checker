@@ -99,10 +99,16 @@ git clone https://github.com/HaoSunWashU/Security-Checker.git
 cd Security-Checker
 
 # 2. Install dependencies / 安装依赖
+# Windows:
 pip install -r requirements.txt
+# macOS / Linux:
+pip3 install -r requirements.txt
 
 # 3. Run / 运行
+# Windows:
 python main.py
+# macOS / Linux:
+python3 main.py
 ```
 
 ### Option C: Run packaged executable (UOS Linux) / 方式C：运行打包后的可执行文件（统信UOS）
@@ -138,12 +144,14 @@ python main.py
 **English:**
 - **Windows:** Right-click `SecurityChecker.exe` → "Run as administrator"
 - **UOS Linux:** Open terminal → `sudo ./SecurityChecker`
-- **Source:** Open terminal → `sudo python main.py` (Linux/macOS) or run as admin (Windows)
+- **Source (macOS/Linux):** Open terminal → `sudo python3 main.py`
+- **Source (Windows):** Open terminal as admin → `python main.py`
 
 **中文：**
 - **Windows：** 右键点击 `SecurityChecker.exe` → 选择"以管理员身份运行"
 - **统信UOS：** 打开终端 → `sudo ./SecurityChecker`
-- **源码运行：** 打开终端 → `sudo python main.py`（Linux/macOS）或以管理员身份运行（Windows）
+- **源码运行（macOS/Linux）：** 打开终端 → `sudo python3 main.py`
+- **源码运行（Windows）：** 以管理员身份打开命令提示符 → `python main.py`
 
 ---
 
@@ -262,11 +270,13 @@ Click **"清空记录"** in the toolbar to reset all tabs and clear cached scan 
 For automated or scripted use (no GUI):
 
 ```bash
-# Run all checks and export as HTML
-python main.py --headless --export html --output /path/to/report.html
-
-# Export as TXT
+# Windows
+python main.py --headless --export html --output report.html
 python main.py --headless --export txt --output report.txt
+
+# macOS / Linux
+python3 main.py --headless --export html --output /path/to/report.html
+python3 main.py --headless --export txt --output report.txt
 
 # Available formats: html, txt, excel, pdf
 ```
@@ -277,11 +287,13 @@ Exit code: `0` = no violations found, `1` = violations found.
 适用于自动化、脚本化执行场景（无图形界面）：
 
 ```bash
-# 执行全部检查并导出HTML报告
-python main.py --headless --export html --output /path/to/report.html
-
-# 导出TXT格式
+# Windows
+python main.py --headless --export html --output report.html
 python main.py --headless --export txt --output report.txt
+
+# macOS / Linux
+python3 main.py --headless --export html --output /path/to/report.html
+python3 main.py --headless --export txt --output report.txt
 
 # 可选格式：html、txt、excel、pdf
 ```

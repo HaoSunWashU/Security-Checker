@@ -47,12 +47,18 @@ class AccountChecker(BaseChecker):
 
         passed = len(violations) == 0
         summary = f"检测账号总数: {len(accounts)}\n风险账号数量: {len(violations)}\n"
-        if violations:
+        summary += "\n所有账号列表:\n"
+        for acc in accounts:
+            risk_map = {v["name"]: v["issues"] for v in violations}
+            issues = risk_map.get(acc["name"])
+            flag = f" ⚠ {', '.join(issues)}" if issues else ""
+            summary += f"  - {acc['name']} [{acc.get('type', 'N/A')}]{flag}\n"
+        if not violations:
+            summary += "\n未发现风险账号。"
+        else:
             summary += "\n风险账号详情:\n"
             for v in violations:
-                summary += f"  - {v['name']} [{v['type']}]: {', '.join(v['issues'])}\n"
-        else:
-            summary += "\n未发现风险账号。"
+                summary += f"  ⚠ {v['name']} [{v['type']}]: {', '.join(v['issues'])}\n"
 
         recommendations = []
         if any("空密码" in v["issues"] for v in violations):
@@ -71,6 +77,7 @@ class AccountChecker(BaseChecker):
             violations=violations,
             summary=summary,
             recommendations=recommendations,
+            extra={"all_accounts": accounts},
         )
 
     def _get_windows_accounts(self) -> list:

@@ -57,6 +57,7 @@ class SoftwareChecker(BaseChecker):
             violations=violations,
             summary=summary,
             recommendations=recommendations,
+            extra={"all_software": installed},
         )
 
     def _get_windows_software(self) -> list:
